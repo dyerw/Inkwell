@@ -5,6 +5,7 @@
 -----------------------------------------------------------------------------------------
 
 local composer = require( "composer" )
+local widget = require "widget"
 local scene = composer.newScene()
 
 --------------------------------------------
@@ -18,6 +19,8 @@ local gridOffset = 150
 
 local letterGrid = {}
 local selectedWord = ""
+
+local selectedPoints = {}
 
 local lastClicked = {x=nil, y=nil}
 
@@ -49,11 +52,12 @@ function translateToGridY(pixelY)
 end
 
 function isAdjacentToLastClicked(x, y)
-    local lastX = lastClicked["x"]
-    local lastY = lastClicked["y"]
-    if lastX == nil and lastY == nil then
+    if #selectedPoints == 0 then
         return true
     end
+    local lastX = selectedPoints[#selectedPoints]["x"]
+    local lastY = selectedPoints[#selectedPoints]["y"]
+
     local dX = math.abs(lastX - x)
     local dY = math.abs(lastY - y)
     if dX <= 1 and dY <= 1 then
@@ -70,9 +74,8 @@ function onTileTouch ( event )
         if isAdjacentToLastClicked(gridX, gridY) then
             letter = letterGrid[gridX][gridY]
             selectedWord = selectedWord .. letter
-            print(selectedWord)
-            lastClicked["x"] = gridX
-            lastClicked["y"] = gridY
+            local newPoint = {x=gridX, y=gridY}
+            selectedPoints[#selectedPoints + 1] = newPoint
             event.target:setStrokeColor(1, 0, 0)
         end
     end
@@ -104,6 +107,10 @@ function drawGrid(y)
     end
 end
 
+local function onSubmitRelease ()
+    print(selectedWord)
+end
+
 function scene:create( event )
 
 	-- Called when the scene's view does not exist.
@@ -128,6 +135,13 @@ function scene:create( event )
 	background:setFillColor( 0 )
 
     drawGrid(gridOffset)
+
+    playBtn = widget.newButton{
+		label="Done",
+		labelColor = { default={255}, over={128} },
+		width=154, height=40,
+		onRelease = onSubmitRelease	-- event listener function
+	}
 
 
 
