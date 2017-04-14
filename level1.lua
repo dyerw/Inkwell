@@ -37,15 +37,15 @@ local score = 0
 
 local secondsLeft = 60
 
-local health = 50
-local enemyHealth = 50
+local health = 100
+local enemyHealth = 100
 
 function round(x)
     return math.floor(x + 0.5)
 end
 
 function randomLetter()
-    letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    letters = "AAAAAAAAABBCCDDDDEEEEEEEEEEEEFFGGGHHIIIIIIIIIJKLLLLMMNNNNNNOOOOOOOOPPQRRRRRRSSSSTTTTTTUUUUVVWWXYYZ"
     index = math.random(string.len(letters))
     return string.sub(letters, index, index)
 end
@@ -195,7 +195,7 @@ local function refreshGrid()
 end
 
 local function endRound()
-    local scoreDiff = 100 - score
+    local scoreDiff = math.random(50,130) - score
     score = 0
     updateScoreLabel()
 
