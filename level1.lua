@@ -33,7 +33,7 @@ local words = {}
 
 local score = 0
 
-local secondsLeft = 30
+local secondsLeft = 60
 
 function round(x)
     return math.floor(x + 0.5)
@@ -145,7 +145,7 @@ local function onSubmitRelease ()
    print(validWord)
 
    if (validWord) then
-       score = score + string.len(selectedWord)
+       score = score + string.len(selectedWord) * string.len(selectedWord)
        scoreLabel.text = tostring(score)
 
        for i=1, #selectedPoints do
