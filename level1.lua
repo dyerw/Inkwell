@@ -26,10 +26,13 @@ local lastClicked = {x=nil, y=nil}
 
 local wordLabel = nil
 local scoreLabel = nil
+local timerLabel = nil
 
 local words = {}
 
 local score = 0
+
+local secondsLeft = 30
 
 function round(x)
     return math.floor(x + 0.5)
@@ -142,6 +145,14 @@ local function onSubmitRelease ()
    selectedPoints = {}
 end
 
+local function iterateTimer ()
+    secondsLeft = secondsLeft - 1
+    timerLabel.text = tostring(secondsLeft)
+    if secondsLeft > 0 then
+        timer.performWithDelay( 1000, iterateTimer)
+    end
+end
+
 function scene:create( event )
 
 	-- Called when the scene's view does not exist.
@@ -150,9 +161,7 @@ function scene:create( event )
 	-- e.g. add display objects to 'sceneGroup', add touch listeners, etc.
     initializeLetterGrid()
     initializeWords()
-    for i=1, gridSize, 1 do
-        print(letterGrid[i][1])
-    end
+
 	local sceneGroup = self.view
 
 
@@ -180,6 +189,11 @@ function scene:create( event )
 
     scoreLabel = display.newText( { text=tostring(score), font=native.systemFontBold,
                                     x=halfW, y=30 } )
+
+    timerLabel = display.newText ( { text=tostring(secondsLeft), font=native.systemFontBold,
+                                     x=halfW, y=100 } )
+
+    iterateTimer()
 
 
 	-- all display objects must be inserted into group
