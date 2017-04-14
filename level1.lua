@@ -19,6 +19,7 @@ local gridOffset = 150
 
 local letterGrid = {}
 local labelGrid = {}
+local tileGrid = {}
 local selectedWord = ""
 
 local selectedPoints = {}
@@ -93,15 +94,20 @@ function onTileTouch ( event )
             local newPoint = {x=gridX, y=gridY}
             selectedPoints[#selectedPoints + 1] = newPoint
             wordLabel.text = selectedWord
+            tileGrid[gridX][gridY].fill.a = tileGrid[gridX][gridY].fill.a + 0.5
         end
     end
 end
 
 function drawTile(x, y)
+    local backgroundRect = display.newRect(x, y, tileSize, tileSize)
+    backgroundRect.fill = { 1 }
+
     rect = display.newRect( x, y, tileSize, tileSize)
     rect.strokeWidth = 2
     rect:setStrokeColor( black )
     rect:addEventListener( "touch", onTileTouch )
+    rect.fill = { 66 / 255, 134 / 255, 244 / 255, 0.01 }
 
     gridX = translateToGridX(x)
     gridY = translateToGridY(y)
@@ -110,6 +116,7 @@ function drawTile(x, y)
     text:setFillColor( black )
 
     labelGrid[gridX][gridY] = text
+    tileGrid[gridX][gridY] = rect
 end
 
 -- Draws a row across entire screen
@@ -137,8 +144,24 @@ function initializeLabelGrid()
     end
 end
 
+function initializeTileGrid()
+    for i=1, gridSize do
+        tileGrid[i] = {}
+    end
+end
+
+function whiteOutTiles()
+    for x=1, gridSize do
+        for y=1, gridSize do
+            tileGrid[x][y].fill.a = 0.01
+        end
+    end
+end
+
 local function onSubmitRelease ()
     print(selectedWord)
+
+    whiteOutTiles()
 
     local validWord = false
     for i=1,#words do
@@ -181,6 +204,8 @@ local function updateEnemyHealthLabel()
 end
 
 local function refreshGrid()
+    whiteOutTiles()
+
     for x=1, #letterGrid do
         for y=1, #(letterGrid[x]) do
             letterGrid[x][y] = randomLetter()
@@ -231,6 +256,7 @@ function scene:create( event )
     initializeLetterGrid()
     initializeWords()
     initializeLabelGrid()
+    initializeTileGrid()
 
 	local sceneGroup = self.view
 
