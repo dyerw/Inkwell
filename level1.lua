@@ -18,6 +18,7 @@ local tileSize = screenW / gridSize
 local gridOffset = 150
 
 local letterGrid = {}
+local labelGrid = {}
 local selectedWord = ""
 
 local selectedPoints = {}
@@ -102,6 +103,8 @@ function drawTile(x, y)
     text = display.newText( { text=letterGrid[gridX][gridY], font=native.systemFontBold,
                               x=x, y=y } )
     text:setFillColor( black )
+
+    labelGrid[gridX][gridY] = text
 end
 
 -- Draws a row across entire screen
@@ -123,6 +126,12 @@ function initializeWords()
   end
 end
 
+function initializeLabelGrid()
+    for i=1, gridSize do
+        labelGrid[i] = {}
+    end
+end
+
 local function onSubmitRelease ()
     print(selectedWord)
 
@@ -138,6 +147,15 @@ local function onSubmitRelease ()
    if (validWord) then
        score = score + string.len(selectedWord)
        scoreLabel.text = tostring(score)
+
+       for i=1, #selectedPoints do
+           local gridX = selectedPoints[i]["x"]
+           local gridY = selectedPoints[i]["y"]
+
+           local newLetter = randomLetter()
+           letterGrid[gridX][gridY] = newLetter
+           labelGrid[gridX][gridY].text = newLetter
+       end
    end
 
    selectedWord = ""
@@ -161,6 +179,7 @@ function scene:create( event )
 	-- e.g. add display objects to 'sceneGroup', add touch listeners, etc.
     initializeLetterGrid()
     initializeWords()
+    initializeLabelGrid()
 
 	local sceneGroup = self.view
 
