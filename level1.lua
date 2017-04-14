@@ -24,6 +24,8 @@ local selectedPoints = {}
 
 local lastClicked = {x=nil, y=nil}
 
+local wordLabel = nil
+
 function round(x)
     return math.floor(x + 0.5)
 end
@@ -76,6 +78,7 @@ function onTileTouch ( event )
             selectedWord = selectedWord .. letter
             local newPoint = {x=gridX, y=gridY}
             selectedPoints[#selectedPoints + 1] = newPoint
+            wordLabel.text = selectedWord
             event.target:setStrokeColor(1, 0, 0)
         end
     end
@@ -136,13 +139,15 @@ function scene:create( event )
 
     drawGrid(gridOffset)
 
-    playBtn = widget.newButton{
+    widget.newButton{
 		label="Done",
 		labelColor = { default={255}, over={128} },
 		width=154, height=40,
 		onRelease = onSubmitRelease	-- event listener function
 	}
 
+    wordLabel = display.newText( { text="", font=native.systemFontBold,
+                                    x=halfW, y=10 } )
 
 
 	-- all display objects must be inserted into group
