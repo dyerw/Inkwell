@@ -25,8 +25,11 @@ local selectedPoints = {}
 local lastClicked = {x=nil, y=nil}
 
 local wordLabel = nil
+local scoreLabel = nil
 
 local words = {}
+
+local score = 0
 
 function round(x)
     return math.floor(x + 0.5)
@@ -129,6 +132,11 @@ local function onSubmitRelease ()
 
    print(validWord)
 
+   if (validWord) then
+       score = score + string.len(selectedWord)
+       scoreLabel.text = tostring(score)
+   end
+
    selectedWord = ""
    wordLabel.text = selectedWord
    selectedPoints = {}
@@ -169,6 +177,9 @@ function scene:create( event )
 
     wordLabel = display.newText( { text="", font=native.systemFontBold,
                                     x=halfW, y=10 } )
+
+    scoreLabel = display.newText( { text=tostring(score), font=native.systemFontBold,
+                                    x=halfW, y=30 } )
 
 
 	-- all display objects must be inserted into group
