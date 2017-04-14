@@ -28,12 +28,17 @@ local lastClicked = {x=nil, y=nil}
 local wordLabel = nil
 local scoreLabel = nil
 local timerLabel = nil
+local healthAmountLabel = nil
+local enemyHealthAmountLabel = nil
 
 local words = {}
 
 local score = 0
 
 local secondsLeft = 60
+
+local health = 50
+local enemyHealth = 50
 
 function round(x)
     return math.floor(x + 0.5)
@@ -121,7 +126,7 @@ function drawGrid(y)
 end
 
 function initializeWords()
-  for line in io.lines(system.pathForFile('./all-words.txt', system.ResourceDirectory)) do
+  for line in io.lines(system.pathForFile('all-words.txt', system.ResourceDirectory)) do
     words[#words + 1] = line
   end
 end
@@ -163,12 +168,58 @@ local function onSubmitRelease ()
    selectedPoints = {}
 end
 
+local function updateScoreLabel()
+    scoreLabel.text = tostring(score)
+end
+
+local function updateHealthLabel()
+    healthAmountLabel.text = tostring(health)
+end
+
+local function updateEnemyHealthLabel()
+    enemyHealthAmountLabel.text = tostring(enemyHealth)
+end
+
+local function refreshGrid()
+    for x=1, #letterGrid do
+        for y=1, #(letterGrid[x]) do
+            letterGrid[x][y] = randomLetter()
+        end
+    end
+
+    for x=1, #labelGrid do
+        for y=1, #(labelGrid[x]) do
+            labelGrid[x][y].text = letterGrid[x][y]
+        end
+    end
+end
+
+local function endRound()
+    local scoreDiff = 100 - score
+    score = 0
+    updateScoreLabel()
+
+    if scoreDiff > 0 then
+        health = health - scoreDiff
+        updateHealthLabel()
+    else
+        enemyHealth = enemyHealth + scoreDiff
+        updateEnemyHealthLabel()
+    end
+
+    refreshGrid()
+
+    secondsLeft = 60
+end
+
 local function iterateTimer ()
     secondsLeft = secondsLeft - 1
     timerLabel.text = tostring(secondsLeft)
-    if secondsLeft > 0 then
-        timer.performWithDelay( 1000, iterateTimer)
+    if secondsLeft == 0 then
+        endRound()
     end
+
+    timer.performWithDelay( 1000, iterateTimer)
 end
 
 function scene:create( event )
@@ -200,7 +251,8 @@ function scene:create( event )
 		label="Done",
 		labelColor = { default={255}, over={128} },
 		width=154, height=40,
-		onRelease = onSubmitRelease	-- event listener function
+		onRelease = onSubmitRelease,
+        left=(halfW - (154 / 2)), top=(screenH - 90)
 	}
 
     wordLabel = display.newText( { text="", font=native.systemFontBold,
@@ -211,6 +263,14 @@ function scene:create( event )
 
     timerLabel = display.newText ( { text=tostring(secondsLeft), font=native.systemFontBold,
                                      x=halfW, y=100 } )
+
+    healthAmountLabel = display.newText ( { text=tostring(health), font=native.systemFontBold,
+                                            x = 20, y = 130 } )
+    healthAmountLabel:setFillColor(0,1,0)
+
+    enemyHealthAmountLabel = display.newText ( { text=tostring(enemyHealth), font=native.systemFontBold,
+                                            x = screenW - 20, y = 130 } )
+    enemyHealthAmountLabel:setFillColor(1,0,0)
 
     iterateTimer()
 
