@@ -26,6 +26,8 @@ local lastClicked = {x=nil, y=nil}
 
 local wordLabel = nil
 
+local words = {}
+
 function round(x)
     return math.floor(x + 0.5)
 end
@@ -79,7 +81,6 @@ function onTileTouch ( event )
             local newPoint = {x=gridX, y=gridY}
             selectedPoints[#selectedPoints + 1] = newPoint
             wordLabel.text = selectedWord
-            event.target:setStrokeColor(1, 0, 0)
         end
     end
 end
@@ -110,8 +111,27 @@ function drawGrid(y)
     end
 end
 
+function initializeWords()
+  for line in io.lines(system.pathForFile('./all-words.txt', system.ResourceDirectory)) do
+    words[#words + 1] = line
+  end
+end
+
 local function onSubmitRelease ()
     print(selectedWord)
+
+    local validWord = false
+    for i=1,#words do
+      if string.lower(words[i]) == string.lower(selectedWord) then
+         validWord = true
+      end
+   end
+
+   print(validWord)
+
+   selectedWord = ""
+   wordLabel.text = selectedWord
+   selectedPoints = {}
 end
 
 function scene:create( event )
@@ -121,6 +141,7 @@ function scene:create( event )
 	-- INSERT code here to initialize the scene
 	-- e.g. add display objects to 'sceneGroup', add touch listeners, etc.
     initializeLetterGrid()
+    initializeWords()
     for i=1, gridSize, 1 do
         print(letterGrid[i][1])
     end
