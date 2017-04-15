@@ -244,6 +244,7 @@ function scene:create( event )
 	--
 	-- INSERT code here to initialize the scene
 	-- e.g. add display objects to 'sceneGroup', add touch listeners, etc.
+    math.randomseed( os.time() )
     initializeLetterGrid()
     initializeWords()
     initializeLabelGrid()
