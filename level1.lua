@@ -29,6 +29,7 @@ local lastClicked = {x=nil, y=nil}
 local wordLabel = nil
 local healthAmountLabel = nil
 local enemyHealthAmountLabel = nil
+local damageLabel = nil
 
 local words = {}
 
@@ -88,6 +89,7 @@ function onTileTouch ( event )
             local newPoint = {x=gridX, y=gridY}
             selectedPoints[#selectedPoints + 1] = newPoint
             wordLabel.text = selectedWord
+            damageLabel.text = tostring(string.len(selectedWord) * string.len(selectedWord))
             tileGrid[gridX][gridY].fill.a = tileGrid[gridX][gridY].fill.a + 0.5
         end
     end
@@ -172,6 +174,28 @@ local function refreshGrid()
     end
 end
 
+local function updateHealthLabel()
+    healthAmountLabel.text = tostring(health)
+end
+
+local function enemyAction()
+    local wordLength = math.random(2, 5)
+    health = health - wordLength * wordLength
+
+    updateHealthLabel()
+
+    if health <= 0 then
+        composer.gotoScene( "gameover", {
+            effect = "fade",
+            time = 400,
+            params = {
+                didWin = false
+            }
+        } )
+    end
+end
+
+
 local function onSubmitRelease ()
     print(selectedWord)
 
@@ -190,26 +214,27 @@ local function onSubmitRelease ()
        enemyHealth = enemyHealth -  string.len(selectedWord) * string.len(selectedWord)
        updateEnemyHealthLabel()
 
+       if enemyHealth <= 0 then
+           composer.gotoScene( "gameover", {
+               effect = "fade",
+               time = 400,
+               params = {
+                   didWin = true
+               }
+           } )
+       end
+
        refreshGrid()
+
+       enemyAction()
    end
 
    selectedWord = ""
    wordLabel.text = selectedWord
+   damageLabel.text = "0"
    selectedPoints = {}
 end
 
-local function updateHealthLabel()
-    healthAmountLabel.text = tostring(health)
-end
-
-local function enemyAction()
-    local wordLength = math.random(2, 5)
-    health = health - wordLength * wordLength
-
-    updateHealthLabel()
-
-    timer.performWithDelay(math.random(2000, 6000), enemyAction)
-end
 
 
 
@@ -258,7 +283,8 @@ function scene:create( event )
                                             x = screenW - 20, y = 130 } )
     enemyHealthAmountLabel:setFillColor(1,0,0)
 
-    enemyAction()
+
+    damageLabel = display.newText( { text="0", font=native.systemFontBold, x = halfW, y = 50, fontSize=30 })
 
 
 	-- all display objects must be inserted into group
