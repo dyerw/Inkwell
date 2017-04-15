@@ -13,7 +13,7 @@ local scene = composer.newScene()
 -- forward declarations and other locals
 local screenW, screenH, halfW, halfH = display.actualContentWidth, display.actualContentHeight, display.contentCenterX, display.contentCenterY
 
-local gridSize = 6
+local gridSize = 4
 local tileSize = screenW / gridSize
 local gridOffset = 150
 
@@ -27,16 +27,10 @@ local selectedPoints = {}
 local lastClicked = {x=nil, y=nil}
 
 local wordLabel = nil
-local scoreLabel = nil
-local timerLabel = nil
 local healthAmountLabel = nil
 local enemyHealthAmountLabel = nil
 
 local words = {}
-
-local score = 0
-
-local secondsLeft = 60
 
 local health = 100
 local enemyHealth = 100
@@ -158,47 +152,6 @@ function whiteOutTiles()
     end
 end
 
-local function onSubmitRelease ()
-    print(selectedWord)
-
-    whiteOutTiles()
-
-    local validWord = false
-    for i=1,#words do
-      if string.lower(words[i]) == string.lower(selectedWord) then
-         validWord = true
-      end
-   end
-
-   print(validWord)
-
-   if (validWord) then
-       score = score + string.len(selectedWord) * string.len(selectedWord)
-       scoreLabel.text = tostring(score)
-
-       for i=1, #selectedPoints do
-           local gridX = selectedPoints[i]["x"]
-           local gridY = selectedPoints[i]["y"]
-
-           local newLetter = randomLetter()
-           letterGrid[gridX][gridY] = newLetter
-           labelGrid[gridX][gridY].text = newLetter
-       end
-   end
-
-   selectedWord = ""
-   wordLabel.text = selectedWord
-   selectedPoints = {}
-end
-
-local function updateScoreLabel()
-    scoreLabel.text = tostring(score)
-end
-
-local function updateHealthLabel()
-    healthAmountLabel.text = tostring(health)
-end
-
 local function updateEnemyHealthLabel()
     enemyHealthAmountLabel.text = tostring(enemyHealth)
 end
@@ -219,33 +172,39 @@ local function refreshGrid()
     end
 end
 
-local function endRound()
-    local scoreDiff = math.random(50,130) - score
-    score = 0
-    updateScoreLabel()
+local function onSubmitRelease ()
+    print(selectedWord)
 
-    if scoreDiff > 0 then
-        health = health - scoreDiff
-        updateHealthLabel()
-    else
-        enemyHealth = enemyHealth + scoreDiff
-        updateEnemyHealthLabel()
-    end
+    whiteOutTiles()
 
-    refreshGrid()
+    local validWord = false
+    for i=1,#words do
+      if string.lower(words[i]) == string.lower(selectedWord) then
+         validWord = true
+      end
+   end
 
-    secondsLeft = 60
+   print(validWord)
+
+   if (validWord) then
+       enemyHealth = enemyHealth -  string.len(selectedWord) * string.len(selectedWord)
+       updateEnemyHealthLabel()
+
+       refreshGrid()
+   end
+
+   selectedWord = ""
+   wordLabel.text = selectedWord
+   selectedPoints = {}
 end
 
-local function iterateTimer ()
-    secondsLeft = secondsLeft - 1
-    timerLabel.text = tostring(secondsLeft)
-    if secondsLeft == 0 then
-        endRound()
-    end
-
-    timer.performWithDelay( 1000, iterateTimer)
+local function updateHealthLabel()
+    healthAmountLabel.text = tostring(health)
 end
+
+
+
+
 
 function scene:create( event )
 
@@ -282,13 +241,7 @@ function scene:create( event )
 	}
 
     wordLabel = display.newText( { text="", font=native.systemFontBold,
-                                    x=halfW, y=10 } )
-
-    scoreLabel = display.newText( { text=tostring(score), font=native.systemFontBold,
-                                    x=halfW, y=30 } )
-
-    timerLabel = display.newText ( { text=tostring(secondsLeft), font=native.systemFontBold,
-                                     x=halfW, y=100 } )
+                                    x=halfW, y=10, fontSize=40 } )
 
     healthAmountLabel = display.newText ( { text=tostring(health), font=native.systemFontBold,
                                             x = 20, y = 130 } )
@@ -297,8 +250,6 @@ function scene:create( event )
     enemyHealthAmountLabel = display.newText ( { text=tostring(enemyHealth), font=native.systemFontBold,
                                             x = screenW - 20, y = 130 } )
     enemyHealthAmountLabel:setFillColor(1,0,0)
-
-    iterateTimer()
 
 
 	-- all display objects must be inserted into group
