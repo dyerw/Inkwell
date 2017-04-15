@@ -202,7 +202,14 @@ local function updateHealthLabel()
     healthAmountLabel.text = tostring(health)
 end
 
+local function enemyAction()
+    local wordLength = math.random(2, 5)
+    health = health - wordLength * wordLength
 
+    updateHealthLabel()
+
+    timer.performWithDelay(math.random(2000, 6000), enemyAction)
+end
 
 
 
@@ -250,6 +257,8 @@ function scene:create( event )
     enemyHealthAmountLabel = display.newText ( { text=tostring(enemyHealth), font=native.systemFontBold,
                                             x = screenW - 20, y = 130 } )
     enemyHealthAmountLabel:setFillColor(1,0,0)
+
+    enemyAction()
 
 
 	-- all display objects must be inserted into group
