@@ -24,7 +24,7 @@ end
 function scene:create( event )
 	local sceneGroup = self.view
 
-  composer.removeScene( "level1" )
+  composer.removeHidden()
 	--
   local background = display.newRect( display.screenOriginX, display.screenOriginY, screenW, screenH )
 	background.anchorX = 0
