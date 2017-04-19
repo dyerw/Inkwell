@@ -3,12 +3,11 @@
 -- level1.lua
 --
 -----------------------------------------------------------------------------------------
-
 local composer = require( "composer" )
+require("wordlookup")
 local widget = require "widget"
 local scene = composer.newScene()
 
---------------------------------------------
 
 -- forward declarations and other locals
 local screenW, screenH, halfW, halfH = display.actualContentWidth, display.actualContentHeight, display.contentCenterX, display.contentCenterY
@@ -195,18 +194,12 @@ local function enemyAction()
     end
 end
 
-
 local function onSubmitRelease ()
     print(selectedWord)
 
     whiteOutTiles()
 
-    local validWord = false
-    for i=1,#words do
-      if string.lower(words[i]) == string.lower(selectedWord) then
-         validWord = true
-      end
-   end
+    local validWord = table.binsearch(words, selectedWord) ~= nil
 
    print(validWord)
 
@@ -311,7 +304,7 @@ function scene:hide( event )
 	local sceneGroup = self.view
 
 	local phase = event.phase
-
+  sceneGroup.active = false
 	if event.phase == "will" then
 		-- Called when the scene is on screen and is about to move off screen
 		--
