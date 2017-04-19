@@ -16,7 +16,7 @@ local playBtn
 local function onPlayBtnRelease()
 
 	-- go to level1.lua scene
-	composer.gotoScene( "level1", "fade", 500 )
+	composer.gotoScene( "gameplay", "fade", 500 )
 
 	return true	-- indicates successful touch
 end
@@ -56,7 +56,7 @@ function scene:create( event )
 	playButton.x = screenW/2
 	playButton.y = screenH/2
 
-	
+
 	sceneGroup:insert(background)
   sceneGroup:insert(outcomeMessage)
 	sceneGroup:insert(playButton)
