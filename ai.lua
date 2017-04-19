@@ -52,14 +52,16 @@ local function allWords(board, words)
       end
     end
     local longest = 0
+    local longestWord = nil
     for k, v in pairs(result) do
         if string.len(v) > longest then
           longest = string.len(v)
-          print(v)
+          longestWord = v
         end
     end
 
-    return longest
+    print(longestWord)
+    return longestWord
 end
 
 function makeMove(board, words)

@@ -24,9 +24,9 @@ end
 function scene:create( event )
 	local sceneGroup = self.view
 
-    composer.removeHidden()
-
-    local background = display.newRect( display.screenOriginX, display.screenOriginY, screenW, screenH )
+  composer.removeScene( "level1" )
+	--
+  local background = display.newRect( display.screenOriginX, display.screenOriginY, screenW, screenH )
 	background.anchorX = 0
 	background.anchorY = 0
 	background:setFillColor( 0 )
@@ -35,26 +35,28 @@ function scene:create( event )
 	--
 	-- INSERT code here to initialize the scene
 	-- e.g. add display objects to 'sceneGroup', add touch listeners, etc.
-    local text = nil
-    if event.params.didWin then
-        text = "You won, you sexy genius."
-    else
-        text = "You lost, you worthless piece of shit."
-    end
-    display.newText( { text=text, font=native.systemFontBold,
-                              x=halfW, y=30 } )
+  local text = nil
+  if event.params.didWin then
+      text = "You won, you sexy genius."
+  else
+      text = "You lost to the word: " .. event.params.enemyWord
+  end
+  display.newText( { text=text, font=native.systemFontBold,
+                            x=halfW, y=30 } )
 
 	-- create a widget button (which will loads level1.lua on release)
-	playBtn = widget.newButton{
+	playButton = widget.newButton{
 		label="Play Again",
 		labelColor = { default={255}, over={128} },
 		width=154, height=40,
 		onRelease = onPlayBtnRelease	-- event listener function
 	}
-	playBtn.x =0
-	playBtn.y = 0
 
-	sceneGroup:insert( playBtn )
+	print(screenW .. " " .. screenH)
+	playButton.x = screenW/2
+	playButton.y = screenH/2
+
+	sceneGroup:insert( playButton )
 end
 
 function scene:show( event )
@@ -85,7 +87,7 @@ function scene:hide( event )
 	end
 end
 
-function scene:destroy( event )
+function scene:destroy3( event )
 	local sceneGroup = self.view
 
 	-- Called prior to the removal of scene's "view" (sceneGroup)

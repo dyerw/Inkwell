@@ -30,11 +30,15 @@ local wordLabel = nil
 local healthAmountLabel = nil
 local enemyHealthAmountLabel = nil
 local damageLabel = nil
+local enemyWordLabel = nil
 
 local words = {}
+local aiWords = {}
 
-local health = 100
-local enemyHealth = 100
+local health = 200
+local enemyHealth = 200
+
+local lastEnemyWord = ""
 
 function round(x)
     return math.floor(x + 0.5)
@@ -132,6 +136,10 @@ function initializeWords()
   for line in io.lines(system.pathForFile('all-words.txt', system.ResourceDirectory)) do
     words[#words + 1] = line
   end
+
+  for line in io.lines(system.pathForFile('wiki-100k.txt', system.ResourceDirectory)) do
+    aiWords[#aiWords + 1] = line
+  end
 end
 
 function initializeLabelGrid()
@@ -179,8 +187,15 @@ local function updateHealthLabel()
 end
 
 local function enemyAction()
-    local wordLength = makeMove(letterGrid, words)
+    print("hello")
+    enemyWordLabel.text = "Enemy making move..."
+    print("hi")
+    local enemyWord = makeMove(letterGrid, aiWords)
+    lastEnemyWord = enemyWord
+    local wordLength = string.len(enemyWord)
     health = health - wordLength * wordLength
+
+    enemyWordLabel.text = "Last Enemy Move: " .. enemyWord
 
     updateHealthLabel()
 
@@ -189,7 +204,8 @@ local function enemyAction()
             effect = "fade",
             time = 400,
             params = {
-                didWin = false
+                didWin = false,
+                enemyWord = lastEnemyWord
             }
         } )
     end
@@ -213,11 +229,12 @@ local function onSubmitRelease ()
                effect = "fade",
                time = 400,
                params = {
-                   didWin = true
+                   didWin = true,
+
                }
            } )
        end
-       
+
        enemyAction()
        refreshGrid()
    end
@@ -276,6 +293,9 @@ function scene:create( event )
     enemyHealthAmountLabel = display.newText ( { text=tostring(enemyHealth), font=native.systemFontBold,
                                             x = screenW - 20, y = 130 } )
     enemyHealthAmountLabel:setFillColor(1,0,0)
+
+    enemyWordLabel = display.newText ( {text=tostring("Last Enemy Move: --"), font=native.systemFontBold,
+                                        x=halfW, y=120, fontSize=12})
 
 
     damageLabel = display.newText( { text="0", font=native.systemFontBold, x = halfW, y = 50, fontSize=30 })
