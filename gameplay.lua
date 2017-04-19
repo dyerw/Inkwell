@@ -225,7 +225,7 @@ local function onSubmitRelease ()
    print(validWord)
 
    if (validWord) then
-       enemyHealth = enemyHealth -  string.len(selectedWord) * string.len(selectedWord)
+       enemyHealth = enemyHealth - string.len(selectedWord) * string.len(selectedWord)
        updateEnemyHealthLabel()
 
        if enemyHealth <= 0 then

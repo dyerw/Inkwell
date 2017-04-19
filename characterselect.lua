@@ -3,15 +3,19 @@ local scene = composer.newScene()
 
 local widget = require "widget"
 
-local lovecraftButton
+local lovecraftButton = nil
+local sceneGroup = nil
 
-local function createLovecraftButton(sceneGroup, image)
+
+local onLovecraftBtnRelease = nil
+
+local function createLovecraftButton(image)
     if lovecraftButton then
         lovecraftButton:removeSelf()
     end
 
     lovecraftButton = widget.newButton{
-		defaultFile = 'lovecraftDown.png',
+		defaultFile = image,
 		width=150, height=150,
 		onRelease = onLovecraftBtnRelease
 	}
@@ -20,18 +24,16 @@ local function createLovecraftButton(sceneGroup, image)
 	sceneGroup:insert( lovecraftButton )
 end
 
-local function onLovecraftBtnRelease()
+onLovecraftBtnRelease = function()
     print('selected lovecraft')
-	--composer.gotoScene( "gameplay", "fade", 500 )
-    createLovecraftButton(scene.view, 'lovecraft.png')
+    createLovecraftButton('lovecraftSelected.png')
 	return true	-- indicates successful touch
 end
 
+
 function scene:create( event )
-	local sceneGroup = self.view
-
-    createLovecraftButton(sceneGroup, 'lovecraftDown.png')
-
+    sceneGroup = self.view
+    createLovecraftButton('lovecraftNotSelected.png')
 end
 
 function scene:show( event )
