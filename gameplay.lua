@@ -9,9 +9,6 @@ local scene = composer.newScene()
 -- forward declarations and other locals
 local screenW, screenH, halfW, halfH = display.actualContentWidth, display.actualContentHeight, display.contentCenterX, display.contentCenterY
 
-
-local sceneGroup = nil
-
 local gridSize = 4
 local tileSize = screenW / gridSize
 local gridOffset = 150
@@ -100,8 +97,6 @@ end
 
 function drawTile(x, y)
     local backgroundRect = display.newRect(x, y, tileSize, tileSize)
-
-    sceneGroup:insert(backgroundRect)
     backgroundRect.fill = { 1 }
 
     rect = display.newRect( x, y, tileSize, tileSize)
@@ -110,14 +105,11 @@ function drawTile(x, y)
     rect:addEventListener( "touch", onTileTouch )
     rect.fill = { 66 / 255, 134 / 255, 244 / 255, 0.01 }
 
-    sceneGroup:insert(rect)
     gridX = translateToGridX(x)
     gridY = translateToGridY(y)
     text = display.newText( { text=letterGrid[gridX][gridY], font=native.systemFontBold,
-                              x=x, y=y } )
+                              x=x, y=y, fontSize=30 } )
     text:setFillColor( black )
-
-    sceneGroup:insert(text)
 
     labelGrid[gridX][gridY] = text
     tileGrid[gridX][gridY] = rect
@@ -254,7 +246,6 @@ end
 
 function scene:create( event )
 
-  sceneGroup = self.view
 	-- Called when the scene's view does not exist.
 	--
 	-- INSERT code here to initialize the scene
@@ -265,6 +256,7 @@ function scene:create( event )
     initializeLabelGrid()
     initializeTileGrid()
 
+	local sceneGroup = self.view
 
 
 
@@ -272,22 +264,20 @@ function scene:create( event )
 	-- the physical screen will likely be a different shape than our defined content area
 	-- since we are going to position the background from it's top, left corner, draw the
 	-- background at the real top, left corner.
-  	local background = display.newRect( display.screenOriginX, display.screenOriginY, screenW, screenH )
-  	background.anchorX = 0
-  	background.anchorY = 0
-  	background:setFillColor( 0 )
-
-  	sceneGroup:insert( background )
+	local background = display.newRect( display.screenOriginX, display.screenOriginY, screenW, screenH )
+	background.anchorX = 0
+	background.anchorY = 0
+	background:setFillColor( 0 )
 
     drawGrid(gridOffset)
 
-    local doneButton = widget.newButton {
-  		label="Done",
-  		labelColor = { default={255}, over={128} },
-  		width=154, height=40,
-  		onRelease = onSubmitRelease,
-          left=(halfW - (154 / 2)), top=(screenH - 90)
-  	}
+    widget.newButton{
+		label="Done",
+		labelColor = { default={255}, over={128} },
+		width=154, height=40,
+		onRelease = onSubmitRelease,
+        left=(halfW - (154 / 2)), top=(screenH - 90)
+	}
 
     wordLabel = display.newText( { text="", font=native.systemFontBold,
                                     x=halfW, y=10, fontSize=40 } )
@@ -308,14 +298,7 @@ function scene:create( event )
 
 
 	-- all display objects must be inserted into group
-
-    sceneGroup:insert(damageLabel)
-    sceneGroup:insert(enemyHealthAmountLabel)
-    sceneGroup:insert(healthAmountLabel)
-    sceneGroup:insert(rect)
-    sceneGroup:insert(wordLabel)
-    sceneGroup:insert(doneButton)
-    sceneGroup:insert( enemyWordLabel )
+	sceneGroup:insert( background )
 end
 
 
@@ -355,7 +338,7 @@ function scene:destroy( event )
 	--
 	-- INSERT code here to cleanup the scene
 	-- e.g. remove display objects, remove touch listeners, save state, etc.
-	-- local sceneGroup = self.view
+	local sceneGroup = self.view
 end
 
 ---------------------------------------------------------------------------------
