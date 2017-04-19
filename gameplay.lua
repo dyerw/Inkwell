@@ -39,6 +39,9 @@ local enemyHealth = 200
 
 local lastEnemyWord = ""
 
+local successSoundEffect = nil
+local failSoundEffect = nil
+
 function round(x)
     return math.floor(x + 0.5)
 end
@@ -225,6 +228,8 @@ local function onSubmitRelease ()
    print(validWord)
 
    if (validWord) then
+
+       audio.play( successSoundEffect )
        enemyHealth = enemyHealth -  string.len(selectedWord) * string.len(selectedWord)
        updateEnemyHealthLabel()
 
@@ -241,6 +246,8 @@ local function onSubmitRelease ()
 
        enemyAction()
        refreshGrid()
+   else
+     audio.play(failSoundEffect)
    end
 
    selectedWord = ""
@@ -254,6 +261,8 @@ end
 
 function scene:create( event )
 
+  successSoundEffect = audio.loadSound("soundeffects/success.mp3")
+  failSoundEffect = audio.loadSound("soundeffects/failure.mp3")
   sceneGroup = self.view
 	-- Called when the scene's view does not exist.
 	--
@@ -361,6 +370,8 @@ function scene:destroy( event )
     doneButton:removeSelf();
     doneButton = nil
   end
+  audio.dispose( successSoundEffect )
+  audio.dispose( failSoundEffect )
 end
 
 ---------------------------------------------------------------------------------
