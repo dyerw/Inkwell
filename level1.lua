@@ -3,12 +3,12 @@
 -- level1.lua
 --
 -----------------------------------------------------------------------------------------
-
 local composer = require( "composer" )
+require("wordlookup")
+require("ai")
 local widget = require "widget"
 local scene = composer.newScene()
 
---------------------------------------------
 
 -- forward declarations and other locals
 local screenW, screenH, halfW, halfH = display.actualContentWidth, display.actualContentHeight, display.contentCenterX, display.contentCenterY
@@ -30,11 +30,15 @@ local wordLabel = nil
 local healthAmountLabel = nil
 local enemyHealthAmountLabel = nil
 local damageLabel = nil
+local enemyWordLabel = nil
 
 local words = {}
+local aiWords = {}
 
-local health = 100
-local enemyHealth = 100
+local health = 200
+local enemyHealth = 200
+
+local lastEnemyWord = ""
 
 function round(x)
     return math.floor(x + 0.5)
@@ -132,6 +136,10 @@ function initializeWords()
   for line in io.lines(system.pathForFile('all-words.txt', system.ResourceDirectory)) do
     words[#words + 1] = line
   end
+
+  for line in io.lines(system.pathForFile('wiki-100k.txt', system.ResourceDirectory)) do
+    aiWords[#aiWords + 1] = line
+  end
 end
 
 function initializeLabelGrid()
@@ -179,8 +187,15 @@ local function updateHealthLabel()
 end
 
 local function enemyAction()
-    local wordLength = math.random(2, 5)
+    print("hello")
+    enemyWordLabel.text = "Enemy making move..."
+    print("hi")
+    local enemyWord = makeMove(letterGrid, aiWords)
+    lastEnemyWord = enemyWord
+    local wordLength = string.len(enemyWord)
     health = health - wordLength * wordLength
+
+    enemyWordLabel.text = "Last Enemy Move: " .. enemyWord
 
     updateHealthLabel()
 
@@ -189,24 +204,19 @@ local function enemyAction()
             effect = "fade",
             time = 400,
             params = {
-                didWin = false
+                didWin = false,
+                enemyWord = lastEnemyWord
             }
         } )
     end
 end
-
 
 local function onSubmitRelease ()
     print(selectedWord)
 
     whiteOutTiles()
 
-    local validWord = false
-    for i=1,#words do
-      if string.lower(words[i]) == string.lower(selectedWord) then
-         validWord = true
-      end
-   end
+    local validWord = table.binsearch(words, selectedWord) ~= nil
 
    print(validWord)
 
@@ -219,14 +229,14 @@ local function onSubmitRelease ()
                effect = "fade",
                time = 400,
                params = {
-                   didWin = true
+                   didWin = true,
+
                }
            } )
        end
 
-       refreshGrid()
-
        enemyAction()
+       refreshGrid()
    end
 
    selectedWord = ""
@@ -284,6 +294,9 @@ function scene:create( event )
                                             x = screenW - 20, y = 130 } )
     enemyHealthAmountLabel:setFillColor(1,0,0)
 
+    enemyWordLabel = display.newText ( {text=tostring("Last Enemy Move: --"), font=native.systemFontBold,
+                                        x=halfW, y=120, fontSize=12})
+
 
     damageLabel = display.newText( { text="0", font=native.systemFontBold, x = halfW, y = 50, fontSize=30 })
 
@@ -311,7 +324,7 @@ function scene:hide( event )
 	local sceneGroup = self.view
 
 	local phase = event.phase
-
+  sceneGroup.active = false
 	if event.phase == "will" then
 		-- Called when the scene is on screen and is about to move off screen
 		--
