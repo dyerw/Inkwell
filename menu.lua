@@ -13,10 +13,13 @@ end
 function scene:create( event )
 	local sceneGroup = self.view
 
+    local logoImage = display.newImage( sceneGroup, 'logo.png', display.contentCenterX, 100)
+    logoImage:scale(0.3, 0.3)
+
     -- Initialize Play Button
 	playBtn = widget.newButton{
-		label="Play Now",
-		labelColor = { default={255}, over={128} },
+		defaultFile = 'playButton.png',
+        overFile = 'playButtonDown.png',
 		width=154, height=40,
 		onRelease = onPlayBtnRelease
 	}
