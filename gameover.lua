@@ -41,7 +41,7 @@ function scene:create( event )
   else
       text = "You lost to the word: " .. event.params.enemyWord
   end
-  display.newText( { text=text, font=native.systemFontBold,
+  local outcomeMessage = display.newText( { text=text, font=native.systemFontBold,
                             x=halfW, y=30 } )
 
 	-- create a widget button (which will loads level1.lua on release)
@@ -56,7 +56,10 @@ function scene:create( event )
 	playButton.x = screenW/2
 	playButton.y = screenH/2
 
-	sceneGroup:insert( playButton )
+	
+	sceneGroup:insert(background)
+  sceneGroup:insert(outcomeMessage)
+	sceneGroup:insert(playButton)
 end
 
 function scene:show( event )
