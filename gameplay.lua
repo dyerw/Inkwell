@@ -320,6 +320,7 @@ end
 
 
 function scene:show( event )
+  composer.removeHidden()
 	local sceneGroup = self.view
 	local phase = event.phase
 
@@ -356,6 +357,10 @@ function scene:destroy( event )
 	-- INSERT code here to cleanup the scene
 	-- e.g. remove display objects, remove touch listeners, save state, etc.
 	-- local sceneGroup = self.view
+  if doneButton then
+    doneButton:removeSelf();
+    doneButton = nil
+  end
 end
 
 ---------------------------------------------------------------------------------
