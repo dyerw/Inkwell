@@ -1,5 +1,13 @@
 require("wordlookup")
 
+function take(table, n)
+    result = {}
+    for i=0, n do
+        result[#result + 1] = table[i]
+    end
+    return result
+end
+
 function concat(t1,t2)
     for i=1,#t2 do
         t1[#t1+1] = t2[i]
@@ -65,5 +73,6 @@ local function allWords(board, words)
 end
 
 function makeMove(board, words)
+    -- words = take(words, 1000)
     return allWords(board, words)
 end
