@@ -5,6 +5,7 @@
 -----------------------------------------------------------------------------------------
 local composer = require( "composer" )
 require("wordlookup")
+require("ai")
 local widget = require "widget"
 local scene = composer.newScene()
 
@@ -178,7 +179,7 @@ local function updateHealthLabel()
 end
 
 local function enemyAction()
-    local wordLength = math.random(2, 5)
+    local wordLength = makeMove(letterGrid, words)
     health = health - wordLength * wordLength
 
     updateHealthLabel()
@@ -216,10 +217,9 @@ local function onSubmitRelease ()
                }
            } )
        end
-
-       refreshGrid()
-
+       
        enemyAction()
+       refreshGrid()
    end
 
    selectedWord = ""
