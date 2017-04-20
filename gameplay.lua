@@ -228,7 +228,6 @@ local function onSubmitRelease ()
    print(validWord)
 
    if (validWord) then
-
        audio.play( successSoundEffect )
        enemyHealth = enemyHealth -  string.len(selectedWord) * string.len(selectedWord)
        updateEnemyHealthLabel()
@@ -263,7 +262,9 @@ function scene:create( event )
 
   successSoundEffect = audio.loadSound("soundeffects/success.mp3")
   failSoundEffect = audio.loadSound("soundeffects/failure.mp3")
-  sceneGroup = self.view
+    composer.removeHidden( )
+    print("you chose to play as: " .. event.params.character)
+    sceneGroup = self.view
 	-- Called when the scene's view does not exist.
 	--
 	-- INSERT code here to initialize the scene
