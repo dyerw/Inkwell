@@ -253,8 +253,9 @@ end
 
 
 function scene:create( event )
-
-  sceneGroup = self.view
+    composer.removeHidden( )
+    print("you chose to play as: " .. event.params.character)
+    sceneGroup = self.view
 	-- Called when the scene's view does not exist.
 	--
 	-- INSERT code here to initialize the scene

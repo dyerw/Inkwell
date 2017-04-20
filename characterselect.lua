@@ -45,7 +45,6 @@ function createButton(author, buttonState, y)
         willButton:removeSelf()
     end
 
-    print(author)
     local imageCandidates = images[author]
     local image = imageCandidates[buttonState]
     local button = widget.newButton{
@@ -72,7 +71,6 @@ function deselect()
 end
 
 function createBackground()
-    print("building background")
     background = widget.newButton{
 		defaultFile = "background.jpg",
         x=halfW, y=halfH,
@@ -82,12 +80,34 @@ function createBackground()
     sceneGroup:insert(background)
 end
 
+function startGame()
+    composer.gotoScene( "gameplay", {
+        effect = "fade",
+        time = 400,
+        params = {
+            character = selectedGuy["author"]
+        }
+    } )
+end
+
+function createSubmit()
+    local submit = widget.newButton {
+    		label="play",
+    		labelColor = { default={255}, over={128} },
+    		width=154, height=40,
+    		onRelease = startGame,
+            left=(halfW - (154 / 2)), top=(screenH - 90)
+    	}
+    sceneGroup:insert(submit)
+ end
+
 function scene:create( event )
     sceneGroup = self.view
     createBackground()
     for index, author in pairs( authors ) do
         createButton(author, "notSelected", heights[author])
     end
+    createSubmit()
 end
 
 function scene:show( event )
@@ -109,6 +129,10 @@ function scene:destroy( event )
     if background then
         background:removeSelf()
         background = nil
+    end
+    if submit then
+        submit:removeSelf()
+        submit = nil
     end
 end
 
