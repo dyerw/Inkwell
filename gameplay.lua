@@ -225,7 +225,7 @@ local function onSubmitRelease ()
    print(validWord)
 
    if (validWord) then
-       enemyHealth = enemyHealth -  string.len(selectedWord) * string.len(selectedWord)
+       enemyHealth = enemyHealth - string.len(selectedWord) * string.len(selectedWord)
        updateEnemyHealthLabel()
 
        if enemyHealth <= 0 then
@@ -253,8 +253,9 @@ end
 
 
 function scene:create( event )
-
-  sceneGroup = self.view
+    composer.removeHidden( )
+    print("you chose to play as: " .. event.params.character)
+    sceneGroup = self.view
 	-- Called when the scene's view does not exist.
 	--
 	-- INSERT code here to initialize the scene
