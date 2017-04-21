@@ -102,6 +102,7 @@ function createSubmit()
  end
 
 function scene:create( event )
+
     sceneGroup = self.view
     createBackground()
     for index, author in pairs( authors ) do

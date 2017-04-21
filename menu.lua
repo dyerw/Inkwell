@@ -11,6 +11,8 @@ local function onPlayBtnRelease()
 end
 
 function scene:create( event )
+	music = audio.loadSound("soundeffects/gamemusic.mp3")
+    audio.play(music)
 	local sceneGroup = self.view
 
     local logoImage = display.newImage( sceneGroup, 'logo.png', display.contentCenterX, 100)
