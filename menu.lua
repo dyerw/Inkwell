@@ -11,6 +11,10 @@ local function onPlayBtnRelease()
 end
 
 function scene:create( event )
+	local options =
+	{
+	    loops = -1, -- loop indefinitely 
+	}
 	music = audio.loadSound("soundeffects/gamemusic.mp3")
     audio.play(music)
 	local sceneGroup = self.view
