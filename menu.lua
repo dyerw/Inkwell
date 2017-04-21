@@ -13,10 +13,10 @@ end
 function scene:create( event )
 	local options =
 	{
-	    loops = -1, -- loop indefinitely 
+	    loops = -1, -- loop indefinitely
 	}
 	music = audio.loadSound("soundeffects/gamemusic.mp3")
-    audio.play(music)
+    audio.play(music, options)
 	local sceneGroup = self.view
 
     local logoImage = display.newImage( sceneGroup, 'logo.png', display.contentCenterX, 100)
