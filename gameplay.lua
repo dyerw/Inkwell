@@ -34,8 +34,12 @@ local enemyWordLabel = nil
 local words = {}
 local aiWords = {}
 
-local health = 200
+local playerHealth = 200
 local enemyHealth = 200
+
+
+local playerHealthBar
+local enemyHealthBar
 
 local lastEnemyWord = ""
 
@@ -170,7 +174,8 @@ function whiteOutTiles()
 end
 
 local function updateEnemyHealthLabel()
-    enemyHealthAmountLabel.text = tostring(enemyHealth)
+    enemyHealthBar.width = (enemyHealth / 200) * 100
+    enemyHealthBar.x = screenW - ((enemyHealthBar.width / 2) + 10)
 end
 
 local function refreshGrid()
@@ -190,7 +195,8 @@ local function refreshGrid()
 end
 
 local function updateHealthLabel()
-    healthAmountLabel.text = tostring(health)
+    playerHealthBar.width = (playerHealth / 200) * 100
+    playerHealthBar.x = (playerHealthBar.width / 2) + 10
 end
 
 local function enemyAction()
@@ -200,13 +206,13 @@ local function enemyAction()
     local enemyWord = makeMove(letterGrid, aiWords)
     lastEnemyWord = enemyWord
     local wordLength = string.len(enemyWord)
-    health = health - wordLength * wordLength
+    playerHealth = playerHealth - wordLength * wordLength
 
     enemyWordLabel.text = "Last Enemy Move: " .. enemyWord
 
     updateHealthLabel()
 
-    if health <= 0 then
+    if playerHealth <= 0 then
         composer.gotoScene( "gameover", {
             effect = "fade",
             time = 400,
@@ -302,17 +308,15 @@ function scene:create( event )
     wordLabel = display.newText( { text="", font=native.systemFontBold,
                                     x=halfW, y=10, fontSize=40 } )
 
-    healthAmountLabel = display.newText ( { text=tostring(health), font=native.systemFontBold,
-                                            x = 20, y = 130 } )
-    healthAmountLabel:setFillColor(0,1,0)
+    playerHealthBar = display.newRect(60, 90, 100, 25)
+    playerHealthBar:setFillColor(0, 1, 0)
 
-    enemyHealthAmountLabel = display.newText ( { text=tostring(enemyHealth), font=native.systemFontBold,
-                                            x = screenW - 20, y = 130 } )
-    enemyHealthAmountLabel:setFillColor(1,0,0)
+
+    enemyHealthBar = display.newRect(screenW - 60, 90, 100, 25)
+    enemyHealthBar:setFillColor(1, 0, 0)
 
     enemyWordLabel = display.newText ( {text=tostring("Last Enemy Move: --"), font=native.systemFontBold,
                                         x=halfW, y=120, fontSize=12})
-
 
     damageLabel = display.newText( { text="0", font=native.systemFontBold, x = halfW, y = 50, fontSize=30 })
 
@@ -320,8 +324,8 @@ function scene:create( event )
 	-- all display objects must be inserted into group
 
     sceneGroup:insert(damageLabel)
-    sceneGroup:insert(enemyHealthAmountLabel)
-    sceneGroup:insert(healthAmountLabel)
+    sceneGroup:insert(enemyHealthBar)
+    sceneGroup:insert(playerHealthBar)
     sceneGroup:insert(rect)
     sceneGroup:insert(wordLabel)
     sceneGroup:insert(doneButton)
