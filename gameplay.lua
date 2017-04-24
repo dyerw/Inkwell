@@ -35,13 +35,23 @@ local enemyWordLabel = nil
 local energyLabel = nil
 local energyAmount = 0
 
+-- Lovecraft Only stuff
+
+local activatePowerBtn = nil
+local destroyedTiles = {}
+local energyRequired = 1
+
+local powerIsActivated = false
+
+--
+
 local energyTilePosition = {x=nil, y=nil}
 
 local words = {}
 local aiWords = {}
 
-local playerHealth = 200
-local enemyHealth = 200
+local playerHealth = 300
+local enemyHealth = 300
 
 
 local playerHealthBar
@@ -99,6 +109,16 @@ function onTileTouch ( event )
     if (event.phase == "began") then
         gridX = translateToGridX(event.target.x)
         gridY = translateToGridY(event.target.y)
+        if powerIsActivated then
+            destroyedTiles[#destroyedTiles + 1] = {x=gridX, y=gridY}
+            local img = display.newImage('void.png', event.target.x, event.target.y)
+            img.height = event.target.width - 10
+            img.width = event.target.height - 10
+            sceneGroup:insert(img)
+            powerIsActivated = false
+            return
+        end
+
         if isAdjacentToLastClicked(gridX, gridY) then
             letter = letterGrid[gridX][gridY]
             selectedWord = selectedWord .. letter
@@ -189,7 +209,7 @@ function whiteOutTiles()
 end
 
 local function updateEnemyHealthLabel()
-    enemyHealthBar.width = (enemyHealth / 200) * 100
+    enemyHealthBar.width = (enemyHealth / 300) * 100
     enemyHealthBar.x = screenW - ((enemyHealthBar.width / 2) + 10)
 end
 
@@ -212,12 +232,18 @@ local function refreshGrid()
 end
 
 local function updateHealthLabel()
-    playerHealthBar.width = (playerHealth / 200) * 100
+    playerHealthBar.width = (playerHealth / 300) * 100
     playerHealthBar.x = (playerHealthBar.width / 2) + 10
 end
 
 local function enemyAction()
     enemyWordLabel.text = "Enemy making move..."
+
+    -- Remove destroyedTiles
+    for i=1,#destroyedTiles do
+        letterGrid[destroyedTiles[i].x][destroyedTiles[i].y] = ""
+    end
+
     local enemyWord = makeMove(letterGrid, aiWords)
     lastEnemyWord = enemyWord
     local wordLength = string.len(enemyWord)
@@ -283,7 +309,16 @@ local function onSubmitRelease ()
    selectedPoints = {}
 end
 
+function onPowerActivate()
+    if energyAmount < energyRequired then
+        audio.play(failSoundEffect)
+        return
+    end
 
+    energyAmount = 0
+    energyLabel.text = "ENERGY: 0"
+    powerIsActivated = true
+end
 
 
 function scene:create( event )
@@ -323,7 +358,7 @@ function scene:create( event )
   		labelColor = { default={255}, over={128} },
   		width=154, height=40,
   		onRelease = onSubmitRelease,
-          left=(halfW - (154 / 2)), top=(screenH - 90)
+          left=(halfW - (154 / 2) + 20), top=(screenH - 80)
   	}
 
     wordLabel = display.newText( { text="", font=native.systemFontBold,
@@ -344,8 +379,21 @@ function scene:create( event )
     energyLabel = display.newText( { text="ENERGY: 0", font=native.systemFontBold, x = (halfW / 2), y = 50, fontSize = 15 })
     energyLabel:setFillColor( 252 / 255, 246 / 255, 63 / 255, 1 )
 
+    if (character == "lovecraft") then
+        activatePowerBtn = widget.newButton {
+      		label="Activate",
+      		labelColor = { default={255}, over={128} },
+      		width=80, height=40,
+      		onRelease = onPowerActivate,
+            left=(halfW / 2) - 40, top=(screenH - 80)
+      	}
+    end
+
 
 	-- all display objects must be inserted into group
+    if activatePowerBtn then
+        sceneGroup:insert(activatePowerBtn)
+    end
     sceneGroup:insert(energyLabel)
     sceneGroup:insert(damageLabel)
     sceneGroup:insert(enemyHealthBar)

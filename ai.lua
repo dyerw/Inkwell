@@ -67,8 +67,9 @@ local function allWords(board, words)
           longestWord = v
         end
     end
-
-    print(longestWord)
+    if not longestWord then
+        return ""
+    end
     return longestWord
 end
 
