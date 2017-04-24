@@ -31,6 +31,12 @@ local enemyHealthAmountLabel = nil
 local damageLabel = nil
 local enemyWordLabel = nil
 
+
+local energyLabel = nil
+local energyAmount = 0
+
+local energyTilePosition = {x=nil, y=nil}
+
 local words = {}
 local aiWords = {}
 
@@ -115,11 +121,18 @@ function drawTile(x, y)
     rect.strokeWidth = 2
     rect:setStrokeColor( black )
     rect:addEventListener( "touch", onTileTouch )
-    rect.fill = { 66 / 255, 134 / 255, 244 / 255, 0.01 }
 
-    sceneGroup:insert(rect)
     gridX = translateToGridX(x)
     gridY = translateToGridY(y)
+
+    if ( gridX == energyTilePosition['x'] and gridY == energyTilePosition['y']) then
+        rect.fill = { 252 / 255, 246 / 255, 63 / 255, 1 }
+    else
+        rect.fill = { 66 / 255, 134 / 255, 244 / 255, 0.01 }
+    end
+
+    sceneGroup:insert(rect)
+
     text = display.newText( { text=letterGrid[gridX][gridY], font=native.systemFontBold,
                               x=x, y=y } )
     text:setFillColor( black )
@@ -168,9 +181,11 @@ end
 function whiteOutTiles()
     for x=1, gridSize do
         for y=1, gridSize do
-            tileGrid[x][y].fill.a = 0.01
+            tileGrid[x][y].fill = { 66 / 255, 134 / 255, 244 / 255, 0.01 }
         end
     end
+
+    tileGrid[energyTilePosition.x][energyTilePosition.y].fill = { 252 / 255, 246 / 255, 63 / 255, 1 }
 end
 
 local function updateEnemyHealthLabel()
@@ -179,6 +194,8 @@ local function updateEnemyHealthLabel()
 end
 
 local function refreshGrid()
+
+
     whiteOutTiles()
 
     for x=1, #letterGrid do
@@ -200,9 +217,7 @@ local function updateHealthLabel()
 end
 
 local function enemyAction()
-    print("hello")
     enemyWordLabel.text = "Enemy making move..."
-    print("hi")
     local enemyWord = makeMove(letterGrid, aiWords)
     lastEnemyWord = enemyWord
     local wordLength = string.len(enemyWord)
@@ -225,18 +240,23 @@ local function enemyAction()
 end
 
 local function onSubmitRelease ()
-    print(selectedWord)
 
     whiteOutTiles()
 
     local validWord = table.binsearch(words, selectedWord) ~= nil
 
-   print(validWord)
-
    if (validWord) then
        audio.play( successSoundEffect )
        enemyHealth = enemyHealth -  string.len(selectedWord) * string.len(selectedWord)
        updateEnemyHealthLabel()
+
+       for i=1,#selectedPoints do
+           if (selectedPoints[i].x == energyTilePosition.x and selectedPoints[i].y == energyTilePosition.y) then
+               energyAmount = energyAmount + 1
+           end
+       end
+
+       energyLabel.text = "ENERGY: " .. tostring(energyAmount)
 
        if enemyHealth <= 0 then
            composer.gotoScene( "gameover", {
@@ -250,6 +270,8 @@ local function onSubmitRelease ()
        end
 
        enemyAction()
+
+       energyTilePosition = { x = math.random(gridSize), y = math.random(gridSize) }
        refreshGrid()
    else
      audio.play(failSoundEffect)
@@ -266,10 +288,10 @@ end
 
 function scene:create( event )
 
-  successSoundEffect = audio.loadSound("soundeffects/success.mp3")
-  failSoundEffect = audio.loadSound("soundeffects/failure.mp3")
+    successSoundEffect = audio.loadSound("soundeffects/success.mp3")
+    failSoundEffect = audio.loadSound("soundeffects/failure.mp3")
     composer.removeHidden( )
-    print("you chose to play as: " .. event.params.character)
+    local character =  event.params.character
     sceneGroup = self.view
 	-- Called when the scene's view does not exist.
 	--
@@ -281,8 +303,7 @@ function scene:create( event )
     initializeLabelGrid()
     initializeTileGrid()
 
-
-
+    energyTilePosition={ x = math.random(gridSize), y = math.random(gridSize)}
 
 	-- create a grey rectangle as the backdrop
 	-- the physical screen will likely be a different shape than our defined content area
@@ -320,9 +341,12 @@ function scene:create( event )
 
     damageLabel = display.newText( { text="0", font=native.systemFontBold, x = halfW, y = 50, fontSize=30 })
 
+    energyLabel = display.newText( { text="ENERGY: 0", font=native.systemFontBold, x = (halfW / 2), y = 50, fontSize = 15 })
+    energyLabel:setFillColor( 252 / 255, 246 / 255, 63 / 255, 1 )
+
 
 	-- all display objects must be inserted into group
-
+    sceneGroup:insert(energyLabel)
     sceneGroup:insert(damageLabel)
     sceneGroup:insert(enemyHealthBar)
     sceneGroup:insert(playerHealthBar)
