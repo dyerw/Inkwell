@@ -16,7 +16,7 @@ local playBtn
 local function onPlayBtnRelease()
 
 	-- go to level1.lua scene
-	composer.gotoScene( "characterselect", "fade", 500 )
+	composer.gotoScene( "difficultyscene", "fade", 500 )
 
 	return true	-- indicates successful touch
 end

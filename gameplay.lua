@@ -16,6 +16,7 @@ local gridSize = 4
 local tileSize = screenW / gridSize
 local gridOffset = 150
 
+local originalLetterGrid = {}
 local letterGrid = {}
 local labelGrid = {}
 local tileGrid = {}
@@ -35,13 +36,24 @@ local enemyWordLabel = nil
 local energyLabel = nil
 local energyAmount = 0
 
+local difficulty = nil
+
+local powerIsActivated = false
+
+local character
+
+local energyRequired = {lovecraft = 1,will = 1}
+
 -- Lovecraft Only stuff
 
 local activatePowerBtn = nil
 local destroyedTiles = {}
-local energyRequired = 1
 
-local powerIsActivated = false
+--
+
+-- Shakespeare Only stuff
+
+local tileToBeSwitched = nil
 
 --
 
@@ -50,8 +62,8 @@ local energyTilePosition = {x=nil, y=nil}
 local words = {}
 local aiWords = {}
 
-local playerHealth = 300
-local enemyHealth = 300
+local playerHealth = 200
+local enemyHealth = 200
 
 
 local playerHealthBar
@@ -77,6 +89,13 @@ function initializeLetterGrid()
         letterGrid[x] = {}
         for y=1, gridSize, 1 do
             letterGrid[x][y] = randomLetter()
+        end
+    end
+
+    for x=1, gridSize, 1 do
+        originalLetterGrid[x] = {}
+        for y=1, gridSize, 1 do
+            originalLetterGrid[x][y] = randomLetter()
         end
     end
 end
@@ -105,17 +124,40 @@ function isAdjacentToLastClicked(x, y)
     end
 end
 
+function updateLetters()
+    for x=1, #labelGrid do
+        for y=1, #(labelGrid[x]) do
+            labelGrid[x][y].text = letterGrid[x][y]
+        end
+    end
+end
+
 function onTileTouch ( event )
     if (event.phase == "began") then
         gridX = translateToGridX(event.target.x)
         gridY = translateToGridY(event.target.y)
-        if powerIsActivated then
+        if powerIsActivated and character == 'lovecraft' then
             destroyedTiles[#destroyedTiles + 1] = {x=gridX, y=gridY}
             local img = display.newImage('void.png', event.target.x, event.target.y)
             img.height = event.target.width - 10
             img.width = event.target.height - 10
             sceneGroup:insert(img)
             powerIsActivated = false
+            return
+        end
+
+        if powerIsActivated and character == 'will' then
+            if  not tileToBeSwitched then
+                tileToBeSwitched = {x = gridX, y = gridY}
+                return
+            end
+
+            local tmp = letterGrid[gridX][gridY]
+            letterGrid[gridX][gridY] = letterGrid[tileToBeSwitched.x][tileToBeSwitched.y]
+            letterGrid[tileToBeSwitched.x][tileToBeSwitched.y] = tmp
+            updateLetters()
+            powerIsActivated = false
+            tileToBeSwitched = nil
             return
         end
 
@@ -209,7 +251,7 @@ function whiteOutTiles()
 end
 
 local function updateEnemyHealthLabel()
-    enemyHealthBar.width = (enemyHealth / 300) * 100
+    enemyHealthBar.width = (enemyHealth / 200) * 100
     enemyHealthBar.x = screenW - ((enemyHealthBar.width / 2) + 10)
 end
 
@@ -221,18 +263,15 @@ local function refreshGrid()
     for x=1, #letterGrid do
         for y=1, #(letterGrid[x]) do
             letterGrid[x][y] = randomLetter()
+            originalLetterGrid[x][y] = letterGrid[x][y]
         end
     end
 
-    for x=1, #labelGrid do
-        for y=1, #(labelGrid[x]) do
-            labelGrid[x][y].text = letterGrid[x][y]
-        end
-    end
+    updateLetters()
 end
 
 local function updateHealthLabel()
-    playerHealthBar.width = (playerHealth / 300) * 100
+    playerHealthBar.width = (playerHealth / 200) * 100
     playerHealthBar.x = (playerHealthBar.width / 2) + 10
 end
 
@@ -241,10 +280,10 @@ local function enemyAction()
 
     -- Remove destroyedTiles
     for i=1,#destroyedTiles do
-        letterGrid[destroyedTiles[i].x][destroyedTiles[i].y] = ""
+        originalLetterGrid[destroyedTiles[i].x][destroyedTiles[i].y] = ""
     end
 
-    local enemyWord = makeMove(letterGrid, aiWords)
+    local enemyWord = makeMove(originalLetterGrid, aiWords, difficulty)
     lastEnemyWord = enemyWord
     local wordLength = string.len(enemyWord)
     playerHealth = playerHealth - wordLength * wordLength
@@ -310,12 +349,13 @@ local function onSubmitRelease ()
 end
 
 function onPowerActivate()
-    if energyAmount < energyRequired then
+    print(character)
+    if energyAmount < energyRequired[character] then
         audio.play(failSoundEffect)
         return
     end
 
-    energyAmount = 0
+    energyAmount = energyAmount - energyRequired[character]
     energyLabel.text = "ENERGY: 0"
     powerIsActivated = true
 end
@@ -326,7 +366,8 @@ function scene:create( event )
     successSoundEffect = audio.loadSound("soundeffects/success.mp3")
     failSoundEffect = audio.loadSound("soundeffects/failure.mp3")
     composer.removeHidden( )
-    local character =  event.params.character
+    character =  event.params.character
+    difficulty = event.params.difficulty
     sceneGroup = self.view
 	-- Called when the scene's view does not exist.
 	--
@@ -379,15 +420,13 @@ function scene:create( event )
     energyLabel = display.newText( { text="ENERGY: 0", font=native.systemFontBold, x = (halfW / 2), y = 50, fontSize = 15 })
     energyLabel:setFillColor( 252 / 255, 246 / 255, 63 / 255, 1 )
 
-    if (character == "lovecraft") then
-        activatePowerBtn = widget.newButton {
-      		label="Activate",
-      		labelColor = { default={255}, over={128} },
-      		width=80, height=40,
-      		onRelease = onPowerActivate,
-            left=(halfW / 2) - 40, top=(screenH - 80)
-      	}
-    end
+    activatePowerBtn = widget.newButton {
+  		label="Activate",
+  		labelColor = { default={255}, over={128} },
+  		width=80, height=40,
+  		onRelease = onPowerActivate,
+        left=(halfW / 2) - 40, top=(screenH - 80)
+  	}
 
 
 	-- all display objects must be inserted into group

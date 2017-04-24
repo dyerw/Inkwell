@@ -73,7 +73,14 @@ local function allWords(board, words)
     return longestWord
 end
 
-function makeMove(board, words)
-    -- words = take(words, 1000)
+function makeMove(board, words, difficulty)
+    if difficulty == 1 then
+        words = take(words, 1000)
+    end
+
+    if difficulty == 2 then
+        words = take(words, 10000)
+    end
+    
     return allWords(board, words)
 end

@@ -6,7 +6,7 @@ local widget = require "widget"
 local playBtn
 
 local function onPlayBtnRelease()
-	composer.gotoScene( "characterselect", "fade", 500 )
+	composer.gotoScene( "difficultyscene", "fade", 500 )
 	return true	-- indicates successful touch
 end
 

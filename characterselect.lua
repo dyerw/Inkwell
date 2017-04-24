@@ -8,6 +8,8 @@ local screenW, screenH, halfW, halfH = display.actualContentWidth, display.actua
 local sceneGroup = nil
 local background = nil
 
+local difficulty = nil
+
 local authors = {'will', 'lovecraft'}
 local images = {
     will = {
@@ -85,7 +87,8 @@ function startGame()
         effect = "fade",
         time = 400,
         params = {
-            character = selectedGuy["author"]
+            character = selectedGuy["author"],
+            difficulty = difficulty
         }
     } )
 end
@@ -102,6 +105,8 @@ function createSubmit()
  end
 
 function scene:create( event )
+
+    difficulty = event.params.difficulty
 
     sceneGroup = self.view
     createBackground()
